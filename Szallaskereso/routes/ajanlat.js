@@ -6,6 +6,7 @@ const ajanlatRouter = express.Router();
 ajanlatRouter.get('/', async (req, res) => {
     let params = [];
     let szurok = [];
+    let hibak = [];
 
     const { varos, ej, fo } = req.query;
 
@@ -29,6 +30,8 @@ ajanlatRouter.get('/', async (req, res) => {
     if (szurok.length > 0) {
         sql += ` WHERE ${szurok.join(' AND ')}`;
     }
+
+    
 
     try {
         let [eredmeny] = await pool.query(sql, params);

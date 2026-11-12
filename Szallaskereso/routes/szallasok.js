@@ -14,10 +14,9 @@ szallasokRouter.get('/', async (req, res) => {
     if (minCsillag > 5) {
         res.status(400).json({ hiba: 'A megadott minimum értékelés nagy!' });
     }
-
-    /*if (medence !== 'true' || medence !== 'false') {
-        res.status(400).json({ hiba: 'A megadott érték a medencéhez nem megfelelő!' });
-    }*/
+    if (medence !== undefined && medence !== "true" && medence !== "false") {
+        res.status(400).json({ hiba: 'A medence bemeneti paramétere nem megfelelő!' });
+    }
 
     if (varos) {
         params.push(varos);
