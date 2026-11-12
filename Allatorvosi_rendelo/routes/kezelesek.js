@@ -1,5 +1,5 @@
 import pool from '../utils/db.js';
-import express, { Router } from 'express';
+import express from 'express';
 
 const kezelesekRouter = express.Router();
 

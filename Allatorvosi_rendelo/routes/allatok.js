@@ -1,5 +1,5 @@
 import pool from '../utils/db.js';
-import express, { Router} from 'express';
+import express from 'express';
 
 const allatokRouter = express.Router();
 
@@ -33,7 +33,7 @@ allatokRouter.get('/kezeles-nelkul', async (req, res) => {
     let sql = `SELECT allatok.id, allatok.nev, allatok.faj, gazdak.nev from allatok JOIN gazdak ON gazdak.id = allatok.gazda_id LEFT JOIN kezelesek ON kezelesek.allat_id = allatok.id WHERE kezelesek.id IS NULL`;
 
     try {
-        const [rows] = await pool.execute(sql);
+        const [rows] = await pool.query(sql);
         res.json(rows);
     } catch (error) {
         console.error(error);
@@ -45,19 +45,19 @@ allatokRouter.get('/:id', async (req, res) => {
     const { id } = req.params;
 
     try {
-        const [allatRows] = await pool.execute('SELECT allatok.id, allatok.nev, allatok.faj, allatok.szuletes from allatok WHERE id = ?', [id]);
+        const [allatRows] = await pool.query('SELECT allatok.id, allatok.nev, allatok.faj, allatok.szuletes from allatok WHERE id = ?', [id]);
         if (allatRows.length === 0)
         {
             return res.status(404).json({ hiba: 'A megadott állat nem található!' });
         }
 
         const allat1 = allatRows[0];
-        const [gazdaRows] = await pool.execute('SELECT gazdak.id, gazdak.nev, gazdak.telefon FROM gazdak LEFT JOIN allatok ON allatok.gazda_id = gazdak.id WHERE allatok.id = ?', [id]);
+        const [gazdaRows] = await pool.query('SELECT gazdak.id, gazdak.nev, gazdak.telefon FROM gazdak LEFT JOIN allatok ON allatok.gazda_id = gazdak.id WHERE allatok.id = ?', [id]);
         allat1.gazda = gazdaRows;
         res.json(allat1);
 
         const allat2 = allatRows[1]
-        const [kezelesekRows] = await pool.execute('SELECT kezelesek.id, kezelesek.datum, kezelesek.leiras, kezelesek.dij FROM kezelesek LEFT JOIN allatok ON allatok.id = kezelesek.allat_id WHERE allat_id = 2 ORDER BY datum;');
+        const [kezelesekRows] = await pool.query('SELECT kezelesek.id, kezelesek.datum, kezelesek.leiras, kezelesek.dij FROM kezelesek LEFT JOIN allatok ON allatok.id = kezelesek.allat_id WHERE allat_id = 2 ORDER BY datum;');
         allat2.kezelesek = kezelesekRows;
         res.json(allat2);
     } catch (error) {

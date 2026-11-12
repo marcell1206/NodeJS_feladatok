@@ -1,5 +1,5 @@
 import pool from '../utils/db.js';
-import express, { Router } from 'express';
+import express from 'express';
 
 const gazdakRouter = express.Router();
 
@@ -15,7 +15,7 @@ gazdakRouter.get('/', async (req, res) => {
         params.push(varos);
     }
 
-    const [rows] = await pool.execute(sql, params);
+    const [rows] = await pool.query(sql, params);
     res.json(rows);
 });
 
@@ -27,14 +27,14 @@ gazdakRouter.get('/:id', async (req, res) => {
     }
 
     try {
-        const [gazdaRows] = await pool.execute('SELECT id, nev, telefon, varos FROM gazdak WHERE id = ?', [id]);
+        const [gazdaRows] = await pool.query('SELECT id, nev, telefon, varos FROM gazdak WHERE id = ?', [id]);
         if (gazdaRows.length === 0)
         {
             return res.status(404).json({ hiba: 'A megadott gazda nem található!' });
         }
 
         const gazda = gazdaRows[0];
-        const [allatokRows] = await pool.execute('SELECT a.id AS id, a.nev AS nev, a.faj AS faj, a.szuletes AS szuletes FROM `gazdak` LEFT JOIN allatok a ON a.gazda_id = gazdak.id WHERE gazdak.id = ?',  [id]);
+        const [allatokRows] = await pool.query('SELECT a.id AS id, a.nev AS nev, a.faj AS faj, a.szuletes AS szuletes FROM `gazdak` LEFT JOIN allatok a ON a.gazda_id = gazdak.id WHERE gazdak.id = ?',  [id]);
         gazda.allatok = allatokRows;
         res.json(gazda);
     } catch (error) {
