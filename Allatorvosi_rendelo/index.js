@@ -4,14 +4,6 @@ import gazdakRouter from './routes/gazdak.js';
 import allatokRouter from './routes/allatok.js';
 import kezelesekRouter from './routes/kezelesek.js';
 
-let vegpontok =  [
-    { vegpont: `http://localhost:${process.env.PORT ?? 3000}/gazdak` },
-    { vegpont: `http://localhost:${process.env.PORT ?? 3000}/gazdak/:id` },
-    { vegpont: `http://localhost:${process.env.PORT ?? 3000}/allatok` },
-    { vegpont: `http://localhost:${process.env.PORT ?? 3000}/allatok/:id` },
-    { vegpont: `http://localhost:${process.env.PORT ?? 3000}/allatok` }
-]
-
 const app = express();
 app.use(express.json());
 
