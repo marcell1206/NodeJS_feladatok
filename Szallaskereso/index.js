@@ -6,16 +6,6 @@ import orszagokRouter from './routes/orszagok.js';
 import ajanlatRouter from './routes/ajanlat.js';
 import legjobbRouter from './routes/legjobb.js';
 
-let vegpontok = [
-    { vegpont: `http://localhost:${process.env.PORT ?? 3000}/szallasok` },
-    { vegpont: `http://localhost:${process.env.PORT ?? 3000}/szallasok/:id` },
-    { vegpont: `http://localhost:${process.env.PORT ?? 3000}/varosok` },
-    { vegpont: `http://localhost:${process.env.PORT ?? 3000}/varosok/:id` },
-    { vegpont: `http://localhost:${process.env.PORT ?? 3000}/orszagok` },
-    { vegpont: `http://localhost:${process.env.PORT ?? 3000}/ajanlat` },
-    { vegpont: `http://localhost:${process.env.PORT ?? 3000}/legjobb` }
-]
-
 const app = express();
 app.use(express.json());
 
