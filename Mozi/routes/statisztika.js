@@ -4,7 +4,7 @@ import express from 'express';
 const statisztikaRouter = express.Router();
 
 statisztikaRouter.get('/filmek', async (req, res) => {
-    //vetitesenkenti adatok
+    //vetitesenkenti adatok (félig-meddig)
     let sql = 'SELECT filmek.cim AS film, COUNT(foglalasok.vetites_id) AS eladottJegy, vetitesek.jegyar * (COUNT(foglalasok.vetites_id)) AS bevetel, ROUND((COUNT(foglalasok.vetites_id) * 100) / NULLIF(SUM(termek.sorok * termek.szekek), 0), 1) AS telitettseg FROM filmek LEFT JOIN vetitesek ON vetitesek.film_id = filmek.id LEFT JOIN termek ON termek.id = vetitesek.terem_id LEFT JOIN foglalasok ON foglalasok.vetites_id = vetitesek.id GROUP BY foglalasok.vetites_id ORDER BY bevetel DESC;';
 
     try {
