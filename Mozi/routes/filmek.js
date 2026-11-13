@@ -18,6 +18,10 @@ filmekRouter.get('/', async (req, res) => {
 filmekRouter.get('/:id', async (req, res) => {
     const { id } = req.params;
 
+    if (isNaN(id)) {
+        return res.status(400).json({ hiba: 'Az id paraméternek számnak kell lennie!' });
+    }
+
     try {
         const [filmRows] = await pool.query('SELECT * FROM filmek WHERE id = ?', [id]);
         if (filmRows.length === 0) {
@@ -25,7 +29,12 @@ filmekRouter.get('/:id', async (req, res) => {
         }
 
         const film = filmRows[0];
-        const [vetitesekRows] = await pool.query()
+        const [vetitesekRows] = await pool.query('SELECT vetitesek.id, termek.nev, vetitesek.kezdes, vetitesek.jegyar, termek.sorok * termek.szekek - COUNT(foglalasok.vetites_id) AS szabadHely FROM vetitesek LEFT JOIN filmek ON filmek.id = vetitesek.film_id LEFT JOIN termek ON termek.id = vetitesek.terem_id LEFT JOIN foglalasok ON foglalasok.vetites_id = vetitesek.id WHERE filmek.id = ? GROUP BY foglalasok.vetites_id', [id]);
+        film.vetitesek = vetitesekRows;
+        res.json(film);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ hiba: 'Hiba történt az adatok lekérdezése során.' });
     }
 })
 
