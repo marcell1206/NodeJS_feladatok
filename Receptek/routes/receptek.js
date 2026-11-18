@@ -97,4 +97,42 @@ receptekRouter.get('/:id', async (req, res) => {
     }
 });
 
+receptekRouter.post('/:id/hozzavalok', async (req, res) => {
+    const { recept_id, hozzavaloId, mennyiseg } = req.body;
+
+    if (hozzavaloId.length === 0) {
+        return res.status(404).json({ hiba: 'A megadott hozzávaló nem található!' });
+    }
+    if (recept_id.length === 0) {
+        return res.status(404).json({ hiba: 'A megadott ID nem található!' });
+    }
+    if (mennyiseg < 0) {
+        return res.status(400).json({ hiba: 'A megadott mennyiség nem megfelelő.' });
+    }
+
+    let sql = 'INSERT INTO recept_hozzavalok (recept_id, hozzavalo_id, mennyiseg) VALUES (?, ?, ?)';
+
+        try {
+        const [eredmeny] = await pool.query(sql,[recept_id, hozzavaloId, mennyiseg]);
+        res.status(201).json(eredmeny);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ hiba: 'Hiba történt a művelet során.' });
+    }
+});
+
+receptekRouter.delete('/:id/hozzavalok', async (req, res) => {
+    const { recept_id, hozzavaloId } = req.body;
+
+    let sql = 'DELETE FROM recept_hozzavalok WHERE recept_id = ? AND hozzavalo_id = ?';
+
+    try {
+        const [eredmeny] = await pool.query(sql, recept_id, hozzavaloId);
+        res.status(204).json(eredmeny);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ hiba: 'Hiba történt a művelet során.' });
+    }
+})
+
 export default receptekRouter;
