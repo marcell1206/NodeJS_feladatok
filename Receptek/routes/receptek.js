@@ -44,10 +44,27 @@ receptekRouter.get('/', async (req, res) => {
 });
 
 receptekRouter.get('/kereses', async (req, res) => {
-    let sql = 'SELECT receptek.id, receptek.nev, receptek.kategoria FROM receptek LEFT JOIN recept_hozzavalok ON recept_hozzavalok.recept_id = receptek.id LEFT JOIN hozzavalok ON hozzavalok.id = recept_hozzavalok.hozzavalo_id WHERE hozzavalok.nev = ?';
+    let params = [];
+    let szurok = [];
+
+    const { van } = req.query;
+
+    if (van) {
+        params.push(van);
+        szurok.push(` hozzavalok.nev = ?`)
+    }
+
+    let sql = 'SELECT receptek.id, receptek.nev, receptek.kategoria FROM receptek LEFT JOIN recept_hozzavalok ON recept_hozzavalok.recept_id = receptek.id LEFT JOIN hozzavalok ON hozzavalok.id = recept_hozzavalok.hozzavalo_id';
+
+    if (szurok.length > 0) {
+        sql += ` WHERE ${szurok.join()}`;
+    }
+    else {
+        return res.status(400).json({ hiba: 'A paraméter hiányzik az url-ből.' });
+    }
 
     try {
-        const [eredmeny] = await pool.query(sql);
+        const [eredmeny] = await pool.query(sql, params);
         res.json(eredmeny);
     } catch (error) {
         console.error(error);
@@ -57,6 +74,7 @@ receptekRouter.get('/kereses', async (req, res) => {
 
 receptekRouter.get('/:id', async (req, res) => {
     const { id } = req.params;
+    const { adag } = req.params;
 
     try {
         const [receptRows] = await pool.query('SELECT * FROM receptek WHERE receptek.id = ?', [id]);
@@ -66,12 +84,13 @@ receptekRouter.get('/:id', async (req, res) => {
 
         const recept1 = receptRows[0];
         const [hozzavalokRows] = await pool.query('SELECT hozzavalok.id, hozzavalok.nev, recept_hozzavalok.mennyiseg, hozzavalok.mertekegyseg, ROUND(recept_hozzavalok.mennyiseg * hozzavalok.egysegar) AS koltseg FROM hozzavalok LEFT JOIN recept_hozzavalok ON recept_hozzavalok.hozzavalo_id = hozzavalok.id LEFT JOIN receptek ON receptek.id = recept_hozzavalok.recept_id WHERE receptek.id = ? ORDER BY hozzavalok.nev', [id]);
-        recept.hozzavalok = hozzavalokRows;
+        recept1.hozzavalok = hozzavalokRows;
         res.json(recept1);
 
-        // javításra szorul
-        /*const recept2 = receptRows[1];
-        const [koltsegRows] = await pool.query('')*/
+        let recept2 = receptRows[1];
+        const [koltsegRows] = await pool.query('SELECT SUM(ROUND(recept_hozzavalok.mennyiseg * hozzavalok.egysegar)) AS koltseg, ROUND(SUM(ROUND(recept_hozzavalok.mennyiseg * hozzavalok.egysegar) / receptek.adag)) AS adagonkent FROM receptek LEFT JOIN recept_hozzavalok ON recept_hozzavalok.recept_id = receptek.id LEFT JOIN hozzavalok ON hozzavalok.id = recept_hozzavalok.hozzavalo_id WHERE receptek.id = ?', [id]);
+        recept2.koltseg = koltsegRows;
+        res.json(recept2);
     } catch (error) {
         console.error(error)
         res.status(500).json({ hiba: 'Hiba történt a lekérdezés során.' });
